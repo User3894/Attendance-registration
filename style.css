@@ -1,15 +1,19 @@
-/* --- إعدادات عامة --- */
+/* --- إعدادات عامة ومحسنة --- */
 :root {
-    --primary-color: #4a90e2; /* أزرق */
-    --secondary-color: #f5a623; /* برتقالي */
-    --background-color: #f0f2f5; /* رمادي فاتح للخلفية العامة */
-    --container-bg: rgba(255, 255, 255, 0.95); /* أبيض شبه شفاف */
+    --primary-color: #4a76a8; /* أزرق أهدأ قليلاً */
+    --secondary-color: #f5a623;
+    --background-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); /* خلفية متدرجة هادئة */
+    --container-bg: rgba(255, 255, 255, 0.9);
     --text-color: #333;
-    --present-color: #4caf50; /* أخضر للحضور */
-    --absent-color: #f44336; /* أحمر للغياب */
-    --pending-color: #9e9e9e; /* رمادي للحالة المبدئية */
-    --border-radius: 8px;
-    --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --text-light: #555;
+    --present-color: #4CAF50;
+    --absent-color: #f44336;
+    --pending-color: #9E9E9E;
+    --delete-color: #757575; /* لون رمادي للحذف */
+    --border-color: #e0e0e0;
+    --border-radius: 12px; /* زيادة الاستدارة قليلاً */
+    --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --font-main: 'Cairo', sans-serif;
 }
 
 * {
@@ -19,16 +23,17 @@
 }
 
 body {
-    font-family: 'Cairo', sans-serif;
-    background-color: var(--background-color);
+    font-family: var(--font-main);
+    /* background-color: var(--background-color); */
+    background-image: var(--background-gradient); /* استخدام التدرج للخلفية العامة */
     color: var(--text-color);
     line-height: 1.6;
-    overflow: hidden; /* لمنع ظهور شرائط التمرير بسبب خلفية three.js */
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    position: relative; /* مهم لخلفية three.js */
+    position: relative;
 }
 
 /* --- حاوية Three.js (الخلفية) --- */
@@ -38,58 +43,65 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* خلف العناصر الأخرى */
+    z-index: -1;
     overflow: hidden;
+    opacity: 0.6; /* جعل الخلفية أقل إزعاجاً */
 }
 
-/* --- حاوية التطبيق الرئيسية --- */
+/* --- حاوية التطبيق الرئيسية (التغيير الأساسي هنا) --- */
 .app-container {
     background-color: var(--container-bg);
-    padding: 30px 40px;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     width: 90%;
-    max-width: 600px;
-    z-index: 1; /* فوق الخلفية */
-    backdrop-filter: blur(5px); /* تأثير ضبابي للخلفية تحت الحاوية */
-    text-align: center;
-    max-height: 90vh; /* تحديد ارتفاع أقصى */
-    overflow-y: auto; /* تمكين التمرير داخل الحاوية إذا كان المحتوى طويلًا */
-    display: flex;
-    flex-direction: column;
+    max-width: 650px; /* زيادة العرض قليلاً */
+    z-index: 1;
+    backdrop-filter: blur(8px);
+    display: flex; /* !!! تفعيل Flexbox */
+    flex-direction: column; /* !!! ترتيب العناصر عمودياً */
+    max-height: 90vh; /* !!! تحديد ارتفاع أقصى للحاوية */
+    overflow: hidden; /* منع الحاوية نفسها من التمرير */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* حد رقيق */
+}
+
+/* --- رأس التطبيق --- */
+.app-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
 }
 
 h1 {
     color: var(--primary-color);
-    margin-bottom: 25px;
+    text-align: center;
+    margin-bottom: 20px;
     font-weight: 700;
+    font-size: 1.8rem; /* تعديل حجم الخط */
 }
 
-/* --- قسم الإدخال --- */
 .input-section {
     display: flex;
     gap: 10px;
-    margin-bottom: 25px;
 }
 
 #nameInput {
     flex-grow: 1;
-    padding: 12px 15px;
-    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #nameInput:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+    box-shadow: 0 0 0 3px rgba(74, 118, 168, 0.2); /* تغيير تأثير التركيز */
 }
 
 #addButton {
-    padding: 12px 20px;
+    padding: 10px 20px;
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -98,150 +110,172 @@ h1 {
     font-family: inherit;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease;
-    font-weight: 700;
+    font-weight: 600; /* تعديل وزن الخط */
+    flex-shrink: 0;
 }
 
 #addButton:hover {
-    background-color: #3a7bc8; /* درجة أغمق من الأزرق */
+    background-color: #3a6691; /* درجة أغمق */
 }
-
 #addButton:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
-/* --- قائمة الحضور --- */
+/* --- قسم قائمة الأسماء (التغيير الأساسي هنا) --- */
+.attendance-section {
+    padding: 0 25px 15px 25px; /* تعديل الحشو */
+    flex-grow: 1; /* !!! السماح لهذا الجزء بالتمدد ليملأ المساحة المتاحة */
+    overflow-y: auto; /* !!! إضافة التمرير العمودي لهذا الجزء فقط */
+    min-height: 150px; /* حد أدنى للارتفاع لضمان ظهور القائمة */
+}
+
+.list-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: 15px 0 10px 0;
+    position: sticky; /* جعل العنوان يلتصق في الأعلى عند التمرير */
+    top: 0;
+    background: var(--container-bg); /* خلفية للعنوان عند الالتصاق */
+    z-index: 2; /* فوق عناصر القائمة */
+    border-bottom: 1px dashed var(--border-color); /* خط منقط أسفل العنوان */
+    margin-bottom: 10px;
+}
+
 #attendanceList {
     list-style: none;
-    margin-bottom: 25px;
-    text-align: right; /* محاذاة النص لليمين */
-    flex-grow: 1; /* لجعل القائمة تأخذ المساحة المتاحة وتدفع الملخص للأسفل */
-    overflow-y: auto; /* السماح بالتمرير داخل القائمة إذا لزم الأمر */
-    padding-left: 10px; /* مسافة بسيطة من الحافة */
-    padding-right: 10px;
 }
 
 #attendanceList li {
     background-color: #fff;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border-radius: var(--border-radius);
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: calc(var(--border-radius) - 4px); /* استدارة أقل قليلاً */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #eee;
-    transition: all 0.3s ease;
-    opacity: 0; /* للظهور التدريجي */
-    transform: translateY(10px); /* للظهور التدريجي */
-    animation: fadeIn 0.5s forwards;
+    border: 1px solid var(--border-color);
+    border-right: 4px solid var(--pending-color); /* الحد الأيمن للحالة */
+    transition: all 0.3s ease, opacity 0.5s ease, transform 0.5s ease;
+    opacity: 0;
+    transform: translateX(20px);
+    animation: slideIn 0.4s forwards;
 }
 
-@keyframes fadeIn {
+@keyframes slideIn {
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
+}
+
+/* --- حالة التلاشي عند الحذف --- */
+#attendanceList li.removing {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 
 #attendanceList li span {
-    font-weight: 700;
-    flex-grow: 1; /* يأخذ المساحة المتاحة */
-    margin-left: 15px; /* مسافة بين الاسم والأزرار */
+    font-weight: 600;
+    color: var(--text-color);
+    flex-grow: 1;
+    margin-left: 15px; /* مسافة لليسار (بسبب RTL) */
 }
 
 #attendanceList li .actions {
     display: flex;
-    gap: 8px;
-    flex-shrink: 0; /* منع الأزرار من الانكماش */
+    gap: 5px; /* تقليل المسافة بين الأزرار */
+    flex-shrink: 0;
 }
 
-#attendanceList li button {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 5px;
-    color: white;
+.action-btn {
+    background: none;
+    border: 1px solid transparent; /* بداية بدون حدود */
+    color: #aaa; /* لون باهت مبدئي */
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: opacity 0.3s ease, transform 0.1s ease;
-    min-width: 60px; /* عرض أدنى للزر */
+    font-size: 1.1rem; /* حجم أكبر للأيقونات */
+    font-weight: bold;
+    width: 32px; /* حجم ثابت */
+    height: 32px; /* حجم ثابت */
+    border-radius: 50%; /* أزرار دائرية */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+.action-btn:hover {
+    background-color: #f0f0f0; /* خلفية عند المرور */
+    border-color: #ddd; /* حد عند المرور */
+}
+.action-btn:active {
+     transform: scale(0.9);
 }
 
-#attendanceList li button:hover {
-    opacity: 0.9;
-}
+.present-btn { color: var(--present-color); }
+.present-btn:hover { background-color: #e8f5e9; border-color: var(--present-color); }
 
-#attendanceList li button:active {
-    transform: scale(0.95);
-}
+.absent-btn { color: var(--absent-color); }
+.absent-btn:hover { background-color: #ffebee; border-color: var(--absent-color); }
 
-.present-btn { background-color: var(--present-color); }
-.absent-btn { background-color: var(--absent-color); }
+.delete-btn { color: var(--delete-color); }
+.delete-btn:hover { background-color: #f5f5f5; border-color: var(--delete-color); color: #d32f2f; } /* تغيير للون أحمر عند المرور */
 
 /* --- حالات القائمة --- */
-#attendanceList li.present {
-    border-left: 5px solid var(--present-color);
-    background-color: #e8f5e9; /* أخضر فاتح */
-}
+#attendanceList li.present { border-right-color: var(--present-color); background-color: #f8fff8; }
+#attendanceList li.absent { border-right-color: var(--absent-color); background-color: #fff8f8; }
+#attendanceList li.absent span { text-decoration: line-through; color: #aaa; }
+#attendanceList li.pending { border-right-color: var(--pending-color); }
 
-#attendanceList li.absent {
-    border-left: 5px solid var(--absent-color);
-    background-color: #ffebee; /* أحمر فاتح */
-}
-#attendanceList li.absent span {
-    text-decoration: line-through; /* خط في منتصف اسم الغائب */
-    color: #aaa;
-}
-
-#attendanceList li.pending {
-    border-left: 5px solid var(--pending-color);
-    background-color: #f5f5f5; /* رمادي فاتح جدا */
-}
-
-/* --- قسم الملخص --- */
-#summary {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #e9ecef;
-    border-radius: var(--border-radius);
-    border-top: 3px solid var(--primary-color);
-}
-
-#summary p {
-    margin-bottom: 5px;
-    font-size: 1rem;
+/* --- قسم الملخص (الفوتر) --- */
+.app-footer.summary {
+    padding: 15px 25px;
+    background-color: #f8f9fa; /* خلفية مختلفة قليلاً للملخص */
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* السماح بالالتفاف على شاشات صغيرة */
+    gap: 10px;
 }
-#summary p span {
+.app-footer.summary p {
+    font-weight: 600;
+    color: var(--text-light);
+    margin: 0;
+}
+.summary-details {
+    display: flex;
+    gap: 15px; /* مسافة بين عناصر الملخص */
+    flex-wrap: wrap;
+}
+.summary-item {
+    font-size: 0.95rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.summary-item strong {
     font-weight: 700;
-    min-width: 30px; /* لضمان محاذاة الأرقام */
-    text-align: left;
+    margin-right: 3px; /* مسافة بين النص والرقم */
 }
+.present-count { background-color: #e8f5e9; color: #388e3c; }
+.absent-count { background-color: #ffebee; color: #d32f2f; }
+.pending-count { background-color: #f5f5f5; color: #616161; }
 
 
-/* --- تصميم متجاوب بسيط --- */
+/* --- تصميم متجاوب محسن --- */
 @media (max-width: 600px) {
     .app-container {
         width: 95%;
-        padding: 20px;
+        max-height: 95vh; /* السماح بارتفاع أكبر قليلاً */
     }
-    .input-section {
-        flex-direction: column;
-        gap: 15px;
+    .app-header, .attendance-section, .app-footer.summary {
+        padding-left: 15px;
+        padding-right: 15px;
     }
-    #addButton {
-        width: 100%;
+    h1 { font-size: 1.5rem; }
+    #attendanceList li { flex-direction: column; align-items: flex-start; gap: 8px; }
+    #attendanceList li .actions { width: 100%; justify-content: flex-end; }
+    .app-footer.summary { flex-direction: column; align-items: flex-start; }
     }
-     h1 {
-        font-size: 1.8rem;
-    }
-    #attendanceList li {
-        flex-direction: column;
-        align-items: flex-start; /* محاذاة العناصر للبداية (اليمين في RTL) */
-        gap: 10px; /* مسافة بين الاسم والأزرار */
-    }
-    #attendanceList li .actions {
-        width: 100%; /* جعل الأزرار تأخذ العرض الكامل */
-        justify-content: flex-end; /* محاذاة الأزرار للنهاية */
-    }
-  }
