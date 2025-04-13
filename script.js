@@ -1,42 +1,35 @@
-// استيراد Three.js من CDN المحدد في importmap
+// استيراد Three.js
 import * as THREE from 'three';
 
-// --- إعداد Three.js للخلفية ---
+// --- إعداد Three.js (نفس الكود السابق، يمكن تعديل المجسم أو الحركة إذا أردت) ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true }); // alpha: true للخلفية الشفافة
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('three-container').appendChild(renderer.domElement);
 
-// إنشاء شكل هندسي (مثل Icosphere ليكون شكله أجمل من المكعب)
-const geometry = new THREE.IcosahedronGeometry(1.5, 0); // الحجم والتفاصيل
-// مادة تعكس الضوء بشكل طبيعي وتتغير ألوانها
-const material = new THREE.MeshNormalMaterial({ flatShading: true });
+// استخدام شكل أكثر بساطة وأقل استهلاكاً للموارد (TorusKnot كمثال)
+const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+const material = new THREE.MeshNormalMaterial({ flatShading: false }); // استخدام Shading ناعم
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
-// تحديد موقع الكاميرا
 camera.position.z = 5;
 
-// التعامل مع تغيير حجم النافذة
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// وظيفة التحريك
 function animate() {
     requestAnimationFrame(animate);
-
-    // دوران المجسم
-    mesh.rotation.x += 0.005;
-    mesh.rotation.y += 0.007;
-
+    mesh.rotation.x += 0.002; // حركة أبطأ
+    mesh.rotation.y += 0.003;
     renderer.render(scene, camera);
 }
-animate(); // بدء التحريك
+animate();
 
 // --- منطق تطبيق الحضور والغياب ---
 
@@ -46,15 +39,22 @@ const attendanceList = document.getElementById('attendanceList');
 const totalCountEl = document.getElementById('totalCount');
 const presentCountEl = document.getElementById('presentCount');
 const absentCountEl = document.getElementById('absentCount');
+const pendingCountEl = document.getElementById('pendingCount'); // إضافة عداد قيد الانتظار
 
-// تحميل البيانات من LocalStorage إن وجدت
+// تحميل البيانات من LocalStorage
 let attendees = JSON.parse(localStorage.getItem('attendanceData')) || [];
 
-// وظيفة لتحديث عرض القائمة والملخص
+// وظيفة لتحديث عرض القائمة والملخص (محسنة)
 function renderList() {
-    attendanceList.innerHTML = ''; // مسح القائمة الحالية
+    // استخدام DocumentFragment لتحسين الأداء عند إضافة عناصر كثيرة
+    const fragment = document.createDocumentFragment();
     let presentCount = 0;
     let absentCount = 0;
+    let pendingCount = 0;
+
+    // فرز الأسماء أبجدياً (اختياري)
+    attendees.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+
 
     attendees.forEach(attendee => {
         const li = document.createElement('li');
@@ -67,84 +67,127 @@ function renderList() {
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('actions');
 
-        const presentButton = document.createElement('button');
-        presentButton.textContent = 'حاضر';
-        presentButton.classList.add('present-btn');
-        presentButton.addEventListener('click', () => markAttendance(attendee.id, 'present'));
+        // أزرار الحضور والغياب
+        const presentButton = createActionButton('✓', 'present-btn', `تسجيل حضور لـ ${attendee.name}`, () => markAttendance(attendee.id, 'present'));
+        const absentButton = createActionButton('✕', 'absent-btn', `تسجيل غياب لـ ${attendee.name}`, () => markAttendance(attendee.id, 'absent'));
 
-        const absentButton = document.createElement('button');
-        absentButton.textContent = 'غائب';
-        absentButton.classList.add('absent-btn');
-        absentButton.addEventListener('click', () => markAttendance(attendee.id, 'absent'));
+        // *** زر الحذف الجديد ***
+        const deleteButton = createActionButton('🗑️', 'delete-btn', `حذف ${attendee.name}`, () => confirmDelete(attendee.id, attendee.name)); // استخدام رمز سلة مهملات أو '×'
 
         actionsDiv.appendChild(presentButton);
         actionsDiv.appendChild(absentButton);
+        actionsDiv.appendChild(deleteButton); // إضافة زر الحذف
 
         li.appendChild(nameSpan);
         li.appendChild(actionsDiv);
-
-        attendanceList.appendChild(li);
+        fragment.appendChild(li); // إضافة العنصر إلى الـ fragment
 
         // حساب الملخص
-        if (attendee.status === 'present') {
-            presentCount++;
-        } else if (attendee.status === 'absent') {
-            absentCount++;
-        }
+        if (attendee.status === 'present') presentCount++;
+        else if (attendee.status === 'absent') absentCount++;
+        else pendingCount++; // حساب الحالات المعلقة
     });
+
+    // مسح القائمة الحالية وإضافة العناصر الجديدة دفعة واحدة
+    attendanceList.innerHTML = '';
+    attendanceList.appendChild(fragment);
+
 
     // تحديث أرقام الملخص
     totalCountEl.textContent = attendees.length;
     presentCountEl.textContent = presentCount;
     absentCountEl.textContent = absentCount;
+    pendingCountEl.textContent = pendingCount; // تحديث عداد قيد الانتظار
 
-    // حفظ الحالة الحالية في LocalStorage
-    saveData();
+    saveData(); // حفظ الحالة بعد كل تحديث
 }
+
+// وظيفة مساعدة لإنشاء أزرار الإجراءات
+function createActionButton(text, className, title, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.classList.add('action-btn', className);
+    button.title = title; // إضافة تلميح مفيد
+    button.addEventListener('click', onClick);
+    return button;
+}
+
 
 // وظيفة لإضافة اسم جديد
 function addAttendee() {
     const name = nameInput.value.trim();
     if (name === '') {
-        alert('الرجاء إدخال اسم!');
+        // تنبيه بسيط أو يمكن تحسينه لاحقاً (مثل هز الحقل)
+        nameInput.style.borderColor = 'red';
+        setTimeout(() => { nameInput.style.borderColor = 'var(--border-color)'; }, 1500);
         return;
     }
 
+    // التحقق من عدم وجود الاسم مسبقاً (اختياري)
+    if (attendees.some(att => att.name.toLowerCase() === name.toLowerCase())) {
+         alert(`الاسم "${name}" موجود بالفعل في القائمة.`);
+         return;
+    }
+
+
     const newAttendee = {
-        id: Date.now(), // استخدام timestamp كمعرف فريد بسيط
+        id: Date.now(),
         name: name,
-        status: 'pending' // الحالة الأولية: لم يتم التحديد
+        status: 'pending'
     };
 
     attendees.push(newAttendee);
-    nameInput.value = ''; // مسح حقل الإدخال
-    renderList(); // إعادة رسم القائمة
+    nameInput.value = '';
+    nameInput.focus(); // إعادة التركيز على حقل الإدخال
+    renderList();
 }
 
 // وظيفة لتحديد حالة الحضور أو الغياب
 function markAttendance(id, newStatus) {
-    attendees = attendees.map(attendee => {
-        if (attendee.id === id) {
-            return { ...attendee, status: newStatus };
-        }
-        return attendee;
-    });
-    renderList(); // إعادة رسم القائمة لتعكس التغيير
+    attendees = attendees.map(attendee =>
+        attendee.id === id ? { ...attendee, status: newStatus } : attendee
+    );
+    renderList();
 }
 
-// وظيفة لحفظ البيانات في LocalStorage
+// *** وظيفة لتأكيد الحذف ***
+function confirmDelete(id, name) {
+    // يمكنك استخدام نافذة تأكيد مخصصة وأجمل لاحقًا، الآن نستخدم confirm البسيطة
+    if (confirm(`هل أنت متأكد من حذف "${name}"؟`)) {
+        deleteAttendee(id);
+    }
+}
+
+// *** وظيفة لحذف الاسم ***
+function deleteAttendee(id) {
+    // إضافة تأثير بصري قبل الحذف الفعلي
+    const itemToDelete = attendanceList.querySelector(`li[data-id="${id}"]`);
+    if (itemToDelete) {
+        itemToDelete.classList.add('removing'); // إضافة فئة التلاشي
+        // الانتظار لانتهاء التأثير ثم الحذف من البيانات وإعادة الرسم
+        setTimeout(() => {
+            attendees = attendees.filter(attendee => attendee.id !== id);
+            renderList();
+        }, 400); // مدة التأثير في CSS
+    } else {
+        // إذا لم يتم العثور على العنصر (احتياطي)
+        attendees = attendees.filter(attendee => attendee.id !== id);
+        renderList();
+    }
+}
+
+// وظيفة لحفظ البيانات
 function saveData() {
     localStorage.setItem('attendanceData', JSON.stringify(attendees));
 }
 
 // ربط الأحداث
 addButton.addEventListener('click', addAttendee);
-// السماح بالإضافة عند الضغط على Enter في حقل الإدخال
 nameInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addAttendee();
     }
 });
 
-// عرض القائمة عند تحميل الصفحة لأول مرة بالبيانات المحفوظة (إن وجدت)
+// عرض القائمة عند التحميل
 renderList();
