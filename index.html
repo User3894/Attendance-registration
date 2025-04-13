@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق تسجيل الحضور والغياب</title>
+    <title>تطبيق تسجيل الحضور والغياب - محسن</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- حاوية لعرض Three.js -->
@@ -15,33 +15,42 @@
 
     <!-- حاوية التطبيق الرئيسية -->
     <div class="app-container">
-        <h1>تسجيل الحضور والغياب</h1>
+        <header class="app-header">
+            <h1>تسجيل الحضور والغياب</h1>
+            <div class="input-section">
+                <input type="text" id="nameInput" placeholder="أدخل اسم الشخص...">
+                <button id="addButton" title="إضافة اسم جديد">إضافة</button>
+            </div>
+        </header>
 
-        <div class="input-section">
-            <input type="text" id="nameInput" placeholder="أدخل اسم الشخص...">
-            <button id="addButton">إضافة اسم</button>
-        </div>
+        <main class="attendance-section">
+             <h2 class="list-title">قائمة الأسماء (<span id="totalCount">0</span>)</h2>
+            <ul id="attendanceList">
+                <!-- سيتم إضافة الأسماء هنا بواسطة JavaScript -->
+                <!-- مثال لعنصر قائمة:
+                <li data-id="1" class="pending">
+                    <span>اسم الشخص</span>
+                    <div class="actions">
+                        <button class="action-btn present-btn" title="تسجيل حضور">✓</button>
+                        <button class="action-btn absent-btn" title="تسجيل غياب">✕</button>
+                        <button class="action-btn delete-btn" title="حذف الاسم">🗑️</button>  // يمكن استخدام رمز أو نص
+                    </div>
+                </li> -->
+            </ul>
+        </main>
 
-        <ul id="attendanceList">
-            <!-- سيتم إضافة الأسماء هنا بواسطة JavaScript -->
-            <!-- مثال لعنصر قائمة:
-            <li data-id="1" class="pending">
-                <span>اسم الشخص</span>
-                <div class="actions">
-                    <button class="present-btn">حاضر</button>
-                    <button class="absent-btn">غائب</button>
-                </div>
-            </li> -->
-        </ul>
+        <footer class="app-footer summary">
+            <p>الحالة:</p>
+            <div class="summary-details">
+                 <span class="summary-item present-count">حاضر: <strong id="presentCount">0</strong></span>
+                 <span class="summary-item absent-count">غائب: <strong id="absentCount">0</strong></span>
+                 <span class="summary-item pending-count">لم يحدد: <strong id="pendingCount">0</strong></span>
+            </div>
 
-        <div id="summary">
-            <p>الإجمالي: <span id="totalCount">0</span></p>
-            <p>حاضر: <span id="presentCount">0</span></p>
-            <p>غائب: <span id="absentCount">0</span></p>
-        </div>
+        </footer>
     </div>
 
-    <!-- تضمين Three.js عبر CDN (لا حاجة للتنزيل) -->
+    <!-- تضمين Three.js عبر CDN -->
     <script type="importmap">
         {
             "imports": {
@@ -52,4 +61,4 @@
     <!-- ملف السكربت الخاص بالتطبيق -->
     <script type="module" src="script.js"></script>
 </body>
-  </html>
+</html>
