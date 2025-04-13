@@ -2,64 +2,77 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <!-- !!! تعديل هنا: إضافة viewport-fit=cover -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>تطبيق تسجيل الحضور والغياب - محسن</title>
+    <title>نظام الحضور والغياب المطور</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Changed Font -->
 </head>
 <body>
-    <!-- حاوية لعرض Three.js -->
+    <!-- حاوية Three.js -->
     <div id="three-container"></div>
 
     <!-- حاوية التطبيق الرئيسية -->
     <div class="app-container">
+
+        <!-- رأس التطبيق (ثابت) -->
         <header class="app-header">
-            <h1>تسجيل الحضور والغياب</h1>
+            <h1>الحضور والغياب</h1>
             <div class="input-section">
-                <input type="text" id="nameInput" placeholder="أدخل اسم الشخص...">
-                <button id="addButton" title="إضافة اسم جديد">إضافة</button>
+                <input type="text" id="nameInput" placeholder="أدخل اسم جديد..." aria-label="أدخل اسم جديد">
+                <button id="addButton" title="إضافة اسم جديد">
+                    <span class="icon">+</span> <span class="text">إضافة</span>
+                </button>
             </div>
         </header>
 
-        <main class="attendance-section">
-             <h2 class="list-title">قائمة الأسماء (<span id="totalCount">0</span>)</h2>
+        <!-- المحتوى الرئيسي (القائمة قابلة للتمرير) -->
+        <main class="app-main">
+            <div class="list-controls">
+                 <div class="select-all-container">
+                     <input type="checkbox" id="selectAllCheckbox" aria-label="تحديد الكل">
+                     <label for="selectAllCheckbox">تحديد الكل</label>
+                 </div>
+                 <span class="list-counter">الإجمالي: <strong id="totalCount">0</strong></span>
+            </div>
             <ul id="attendanceList">
-                <!-- سيتم إضافة الأسماء هنا بواسطة JavaScript -->
-                <!-- مثال لعنصر قائمة:
+                <!-- العناصر تضاف هنا -->
+                <!-- مثال عنصر:
                 <li data-id="1" class="pending">
-                    <span>اسم الشخص</span>
+                    <input type="checkbox" class="item-checkbox" aria-label="تحديد الاسم">
+                    <span class="attendee-name">اسم الشخص</span>
                     <div class="actions">
-                        <button class="action-btn present-btn" title="تسجيل حضور">✓</button>
-                        <button class="action-btn absent-btn" title="تسجيل غياب">✕</button>
-                        <button class="action-btn delete-btn" title="حذف الاسم">🗑️</button>  // يمكن استخدام رمز أو نص
+                        <button class="action-btn present-btn" title="حاضر">✓</button>
+                        <button class="action-btn absent-btn" title="غائب">✕</button>
+                        <button class="action-btn delete-btn" title="حذف">🗑️</button>
                     </div>
-                </li> -->
+                </li>
+                 -->
             </ul>
+             <p id="emptyListMessage" class="empty-message">القائمة فارغة، قم بإضافة أسماء.</p>
         </main>
 
-        <footer class="app-footer summary">
-            <p>الحالة:</p>
-            <div class="summary-details">
-                 <span class="summary-item present-count">حاضر: <strong id="presentCount">0</strong></span>
-                 <span class="summary-item absent-count">غائب: <strong id="absentCount">0</strong></span>
-                 <span class="summary-item pending-count">لم يحدد: <strong id="pendingCount">0</strong></span>
+        <!-- قدم التطبيق (ثابت) -->
+        <footer class="app-footer">
+            <div class="summary">
+                <span class="summary-item present">حاضر: <strong id="presentCount">0</strong></span>
+                <span class="summary-item absent">غائب: <strong id="absentCount">0</strong></span>
+                <span class="summary-item pending">معلق: <strong id="pendingCount">0</strong></span>
             </div>
-
+            <div class="bulk-actions">
+                <button id="bulkDeleteButton" class="bulk-delete-btn" disabled title="حذف المحدد">
+                    <span class="icon">🗑️</span> <span class="text">حذف المحدد (<span id="selectedCount">0</span>)</span>
+                </button>
+            </div>
         </footer>
+
     </div>
 
-    <!-- تضمين Three.js عبر CDN -->
+    <!-- Three.js ومكتبة التطبيق -->
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.skypack.dev/three@0.132.2/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://cdn.skypack.dev/three@0.132.2/build/three.module.js" } }
     </script>
-    <!-- ملف السكربت الخاص بالتطبيق -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
