@@ -1,35 +1,73 @@
-#attendanceList {
-    list-style: none;
-    overflow-y: auto; /* تبقى كما هي لجعل القائمة قابلة للتمرير */
-    /* --- قم بتغيير هذه القيمة فقط --- */
-    max-height: 18rem; /* !!! تعديل الارتفاع الأقصى ليناسب 5 عناصر تقريبًا */
-                       /* تم حساب هذه القيمة تقريبياً: (ارتفاع العنصر الواحد + الهامش السفلي) * 5 */
-                       /* قد تحتاج إلى تعديل طفيف (مثلاً 17.5rem أو 18.5rem) بناءً على التنسيق الدقيق */
-    /* --- ----------------------- --- */
-    flex-grow: 1;
-    padding-left: 5px;
-    padding-right: 5px;
-     scrollbar-width: thin;
-     scrollbar-color: #ccc #f1f1f1;
+/* --- حاوية التطبيق الرئيسية (التغيير الأساسي هنا) --- */
+.app-container {
+    background-color: var(--container-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 90%;
+    max-width: 650px;
+    z-index: 1;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* مهم لمنع التمرير للحاوية نفسها */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* !!! استخدام dvh بدلاً من vh وتعديل القيمة قليلاً ربما */
+    max-height: 90dvh; /* أو 88dvh لترك مساحة أكبر قليلاً */
+
+    /* !!! تعديل الحشو السفلي لاستخدام safe-area-inset-bottom */
+    /* الحفاظ على الحشو العلوي والجانبي */
+    padding-top: 20px;
+    padding-left: 25px;
+    padding-right: 25px;
+    /* إضافة الحشو السفلي الأصلي + المساحة الآمنة (مع قيمة افتراضية 0px) */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
-/* ... باقي الأنماط لشريط التمرير والعناصر تبقى كما هي ... */
+/* --- قسم الملخص (الفوتر) --- */
+.app-footer.summary {
+    padding: 15px 25px; /* الحفاظ على الحشو الداخلي */
+    background-color: #f8f9fa;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    /* لا حاجة لـ padding-bottom هنا إذا تم تطبيقه على الحاوية الأم */
+}
 
-#attendanceList::-webkit-scrollbar {
-    width: 8px;
-}
-#attendanceList::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
-}
-#attendanceList::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-#attendanceList::-webkit-scrollbar-thumb:hover {
-    background-color: #aaa;
+
+/* --- تصميم متجاوب محسن --- */
+@media (max-width: 600px) {
+    .app-container {
+        width: 100%; /* جعلها تأخذ العرض الكامل على الموبايل */
+        max-width: 100%; /* إلغاء الحد الأقصى للعرض */
+        height: 100%; /* جعلها تأخذ الارتفاع الكامل */
+        max-height: 100dvh; /* استخدام الارتفاع الديناميكي الكامل */
+        border-radius: 0; /* إزالة الحواف الدائرية لتملأ الشاشة */
+        border: none; /* إزالة الحدود */
+        box-shadow: none; /* إزالة الظل */
+
+        /* تعديل الحشو للموبايل مع المساحة الآمنة */
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 15px);
+    }
+
+    /* يمكن تعديل حشو الفوتر أيضًا إذا لزم الأمر */
+    .app-footer.summary {
+        padding: 10px 15px;
+    }
+
+    /* (اختياري) قد تحتاج لتعديل حجم الخط أو التباعد قليلاً للشاشات الصغيرة جداً */
+    h1 { font-size: 1.4rem; margin-bottom: 15px; }
+    .list-title { font-size: 1rem; padding-top: 10px; }
+    #attendanceList li { padding: 8px 12px; }
+    .action-btn { width: 30px; height: 30px; font-size: 1rem; }
+
 }
 
 /* ... باقي ملف CSS يبقى كما هو ... */
