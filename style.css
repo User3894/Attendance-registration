@@ -1,0 +1,247 @@
+/* --- إعدادات عامة --- */
+:root {
+    --primary-color: #4a90e2; /* أزرق */
+    --secondary-color: #f5a623; /* برتقالي */
+    --background-color: #f0f2f5; /* رمادي فاتح للخلفية العامة */
+    --container-bg: rgba(255, 255, 255, 0.95); /* أبيض شبه شفاف */
+    --text-color: #333;
+    --present-color: #4caf50; /* أخضر للحضور */
+    --absent-color: #f44336; /* أحمر للغياب */
+    --pending-color: #9e9e9e; /* رمادي للحالة المبدئية */
+    --border-radius: 8px;
+    --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow: hidden; /* لمنع ظهور شرائط التمرير بسبب خلفية three.js */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative; /* مهم لخلفية three.js */
+}
+
+/* --- حاوية Three.js (الخلفية) --- */
+#three-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* خلف العناصر الأخرى */
+    overflow: hidden;
+}
+
+/* --- حاوية التطبيق الرئيسية --- */
+.app-container {
+    background-color: var(--container-bg);
+    padding: 30px 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 90%;
+    max-width: 600px;
+    z-index: 1; /* فوق الخلفية */
+    backdrop-filter: blur(5px); /* تأثير ضبابي للخلفية تحت الحاوية */
+    text-align: center;
+    max-height: 90vh; /* تحديد ارتفاع أقصى */
+    overflow-y: auto; /* تمكين التمرير داخل الحاوية إذا كان المحتوى طويلًا */
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+/* --- قسم الإدخال --- */
+.input-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+#nameInput {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+#nameInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+#addButton {
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    font-weight: 700;
+}
+
+#addButton:hover {
+    background-color: #3a7bc8; /* درجة أغمق من الأزرق */
+}
+
+#addButton:active {
+    transform: scale(0.98);
+}
+
+/* --- قائمة الحضور --- */
+#attendanceList {
+    list-style: none;
+    margin-bottom: 25px;
+    text-align: right; /* محاذاة النص لليمين */
+    flex-grow: 1; /* لجعل القائمة تأخذ المساحة المتاحة وتدفع الملخص للأسفل */
+    overflow-y: auto; /* السماح بالتمرير داخل القائمة إذا لزم الأمر */
+    padding-left: 10px; /* مسافة بسيطة من الحافة */
+    padding-right: 10px;
+}
+
+#attendanceList li {
+    background-color: #fff;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+    opacity: 0; /* للظهور التدريجي */
+    transform: translateY(10px); /* للظهور التدريجي */
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+#attendanceList li span {
+    font-weight: 700;
+    flex-grow: 1; /* يأخذ المساحة المتاحة */
+    margin-left: 15px; /* مسافة بين الاسم والأزرار */
+}
+
+#attendanceList li .actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0; /* منع الأزرار من الانكماش */
+}
+
+#attendanceList li button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease, transform 0.1s ease;
+    min-width: 60px; /* عرض أدنى للزر */
+}
+
+#attendanceList li button:hover {
+    opacity: 0.9;
+}
+
+#attendanceList li button:active {
+    transform: scale(0.95);
+}
+
+.present-btn { background-color: var(--present-color); }
+.absent-btn { background-color: var(--absent-color); }
+
+/* --- حالات القائمة --- */
+#attendanceList li.present {
+    border-left: 5px solid var(--present-color);
+    background-color: #e8f5e9; /* أخضر فاتح */
+}
+
+#attendanceList li.absent {
+    border-left: 5px solid var(--absent-color);
+    background-color: #ffebee; /* أحمر فاتح */
+}
+#attendanceList li.absent span {
+    text-decoration: line-through; /* خط في منتصف اسم الغائب */
+    color: #aaa;
+}
+
+#attendanceList li.pending {
+    border-left: 5px solid var(--pending-color);
+    background-color: #f5f5f5; /* رمادي فاتح جدا */
+}
+
+/* --- قسم الملخص --- */
+#summary {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: var(--border-radius);
+    border-top: 3px solid var(--primary-color);
+}
+
+#summary p {
+    margin-bottom: 5px;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+#summary p span {
+    font-weight: 700;
+    min-width: 30px; /* لضمان محاذاة الأرقام */
+    text-align: left;
+}
+
+
+/* --- تصميم متجاوب بسيط --- */
+@media (max-width: 600px) {
+    .app-container {
+        width: 95%;
+        padding: 20px;
+    }
+    .input-section {
+        flex-direction: column;
+        gap: 15px;
+    }
+    #addButton {
+        width: 100%;
+    }
+     h1 {
+        font-size: 1.8rem;
+    }
+    #attendanceList li {
+        flex-direction: column;
+        align-items: flex-start; /* محاذاة العناصر للبداية (اليمين في RTL) */
+        gap: 10px; /* مسافة بين الاسم والأزرار */
+    }
+    #attendanceList li .actions {
+        width: 100%; /* جعل الأزرار تأخذ العرض الكامل */
+        justify-content: flex-end; /* محاذاة الأزرار للنهاية */
+    }
+  }
