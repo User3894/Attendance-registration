@@ -1,19 +1,21 @@
-// استيراد Three.js
+// Import Three.js
 import * as THREE from 'three';
 
-// --- إعداد Three.js (نفس الكود السابق، يمكن تعديل المجسم أو الحركة إذا أردت) ---
+// --- Three.js Setup (Subtle Background) ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+// Make background even more subtle
+renderer.setClearColor(0x000000, 0); // Fully transparent
 document.getElementById('three-container').appendChild(renderer.domElement);
 
-// استخدام شكل أكثر بساطة وأقل استهلاكاً للموارد (TorusKnot كمثال)
-const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-const material = new THREE.MeshNormalMaterial({ flatShading: false }); // استخدام Shading ناعم
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+// Simple geometry (e.g., a slowly rotating Torus)
+const geometry = new THREE.TorusGeometry( 2, 0.1, 16, 100 );
+const material = new THREE.MeshBasicMaterial( { color: 0xaaaaaa, wireframe: true, transparent: true, opacity: 0.5 } ); // Subtle wireframe
+const torus = new THREE.Mesh( geometry, material );
+scene.add( torus );
 
 camera.position.z = 5;
 
@@ -25,124 +27,157 @@ window.addEventListener('resize', () => {
 
 function animate() {
     requestAnimationFrame(animate);
-    mesh.rotation.x += 0.002; // حركة أبطأ
-    mesh.rotation.y += 0.003;
+    torus.rotation.x += 0.001; // Very slow rotation
+    torus.rotation.y += 0.0005;
     renderer.render(scene, camera);
 }
 animate();
 
-// --- منطق تطبيق الحضور والغياب ---
+// --- Attendance App Logic ---
 
 const nameInput = document.getElementById('nameInput');
 const addButton = document.getElementById('addButton');
 const attendanceList = document.getElementById('attendanceList');
+const emptyListMessage = document.getElementById('emptyListMessage');
 const totalCountEl = document.getElementById('totalCount');
 const presentCountEl = document.getElementById('presentCount');
 const absentCountEl = document.getElementById('absentCount');
-const pendingCountEl = document.getElementById('pendingCount'); // إضافة عداد قيد الانتظار
+const pendingCountEl = document.getElementById('pendingCount');
+const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+const bulkDeleteButton = document.getElementById('bulkDeleteButton');
+const selectedCountEl = document.getElementById('selectedCount');
 
-// تحميل البيانات من LocalStorage
-let attendees = JSON.parse(localStorage.getItem('attendanceData')) || [];
+// Load data - selection state is transient, not saved
+let attendees = (JSON.parse(localStorage.getItem('attendanceData')) || []).map(att => ({
+    ...att,
+    selected: false // Initialize selection state on load
+}));
 
-// وظيفة لتحديث عرض القائمة والملخص (محسنة)
+// --- Rendering ---
 function renderList() {
-    // استخدام DocumentFragment لتحسين الأداء عند إضافة عناصر كثيرة
     const fragment = document.createDocumentFragment();
     let presentCount = 0;
     let absentCount = 0;
     let pendingCount = 0;
+    let selectedCount = 0;
+    let allSelected = attendees.length > 0; // Assume all selected if list not empty
 
-    // فرز الأسماء أبجدياً (اختياري)
+    // Sort attendees alphabetically (optional)
     attendees.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-
     attendees.forEach(attendee => {
-        const li = document.createElement('li');
-        li.setAttribute('data-id', attendee.id);
-        li.classList.add(attendee.status); // 'present', 'absent', or 'pending'
+        const li = createListItem(attendee);
+        fragment.appendChild(li);
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = attendee.name;
-
-        const actionsDiv = document.createElement('div');
-        actionsDiv.classList.add('actions');
-
-        // أزرار الحضور والغياب
-        const presentButton = createActionButton('✓', 'present-btn', `تسجيل حضور لـ ${attendee.name}`, () => markAttendance(attendee.id, 'present'));
-        const absentButton = createActionButton('✕', 'absent-btn', `تسجيل غياب لـ ${attendee.name}`, () => markAttendance(attendee.id, 'absent'));
-
-        // *** زر الحذف الجديد ***
-        const deleteButton = createActionButton('🗑️', 'delete-btn', `حذف ${attendee.name}`, () => confirmDelete(attendee.id, attendee.name)); // استخدام رمز سلة مهملات أو '×'
-
-        actionsDiv.appendChild(presentButton);
-        actionsDiv.appendChild(absentButton);
-        actionsDiv.appendChild(deleteButton); // إضافة زر الحذف
-
-        li.appendChild(nameSpan);
-        li.appendChild(actionsDiv);
-        fragment.appendChild(li); // إضافة العنصر إلى الـ fragment
-
-        // حساب الملخص
+        // Calculate counts
         if (attendee.status === 'present') presentCount++;
         else if (attendee.status === 'absent') absentCount++;
-        else pendingCount++; // حساب الحالات المعلقة
+        else pendingCount++;
+
+        if(attendee.selected) selectedCount++;
+        else allSelected = false; // If even one is not selected, uncheck "select all"
     });
 
-    // مسح القائمة الحالية وإضافة العناصر الجديدة دفعة واحدة
+    // Clear list and append new items
     attendanceList.innerHTML = '';
     attendanceList.appendChild(fragment);
 
-
-    // تحديث أرقام الملخص
+    // Update summary counts
     totalCountEl.textContent = attendees.length;
     presentCountEl.textContent = presentCount;
     absentCountEl.textContent = absentCount;
-    pendingCountEl.textContent = pendingCount; // تحديث عداد قيد الانتظار
+    pendingCountEl.textContent = pendingCount;
 
-    saveData(); // حفظ الحالة بعد كل تحديث
+    // Update bulk action states
+    selectedCountEl.textContent = selectedCount;
+    bulkDeleteButton.disabled = selectedCount === 0;
+    selectAllCheckbox.checked = allSelected;
+    selectAllCheckbox.indeterminate = selectedCount > 0 && !allSelected; // Indeterminate state
+
+    // Show/hide empty list message
+    emptyListMessage.style.display = attendees.length === 0 ? 'block' : 'none';
+
+    saveData(); // Save status changes (but not selection)
 }
 
-// وظيفة مساعدة لإنشاء أزرار الإجراءات
+function createListItem(attendee) {
+    const li = document.createElement('li');
+    li.setAttribute('data-id', attendee.id);
+    li.classList.add(attendee.status);
+    if (attendee.selected) {
+        li.classList.add('selected');
+    }
+
+    // Checkbox
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.classList.add('item-checkbox');
+    checkbox.checked = attendee.selected;
+    checkbox.setAttribute('aria-label', `تحديد ${attendee.name}`);
+    checkbox.addEventListener('change', () => toggleSelectAttendee(attendee.id));
+    li.appendChild(checkbox);
+
+    // Name
+    const nameSpan = document.createElement('span');
+    nameSpan.classList.add('attendee-name');
+    nameSpan.textContent = attendee.name;
+    li.appendChild(nameSpan);
+
+    // Actions container
+    const actionsDiv = document.createElement('div');
+    actionsDiv.classList.add('actions');
+
+    // Action Buttons
+    const presentBtn = createActionButton('✓', 'present-btn', `تسجيل ${attendee.name} كحاضر`, () => markAttendance(attendee.id, 'present'));
+    const absentBtn = createActionButton('✕', 'absent-btn', `تسجيل ${attendee.name} كغائب`, () => markAttendance(attendee.id, 'absent'));
+    const deleteBtn = createActionButton('🗑️', 'delete-btn', `حذف ${attendee.name}`, () => confirmDeleteSingle(attendee.id, attendee.name));
+
+    actionsDiv.appendChild(presentBtn);
+    actionsDiv.appendChild(absentBtn);
+    actionsDiv.appendChild(deleteBtn);
+    li.appendChild(actionsDiv);
+
+    return li;
+}
+
+// Helper for creating action buttons
 function createActionButton(text, className, title, onClick) {
     const button = document.createElement('button');
-    button.textContent = text;
+    button.innerHTML = text; // Use innerHTML to render icons like 🗑️
     button.classList.add('action-btn', className);
-    button.title = title; // إضافة تلميح مفيد
+    button.title = title;
+    button.setAttribute('aria-label', title);
     button.addEventListener('click', onClick);
     return button;
 }
 
+// --- Event Handlers & Actions ---
 
-// وظيفة لإضافة اسم جديد
 function addAttendee() {
     const name = nameInput.value.trim();
     if (name === '') {
-        // تنبيه بسيط أو يمكن تحسينه لاحقاً (مثل هز الحقل)
-        nameInput.style.borderColor = 'red';
-        setTimeout(() => { nameInput.style.borderColor = 'var(--border-color)'; }, 1500);
+        alert('الرجاء إدخال اسم.');
+        nameInput.focus();
         return;
     }
-
-    // التحقق من عدم وجود الاسم مسبقاً (اختياري)
     if (attendees.some(att => att.name.toLowerCase() === name.toLowerCase())) {
-         alert(`الاسم "${name}" موجود بالفعل في القائمة.`);
+         alert(`الاسم "${name}" موجود بالفعل.`);
+         nameInput.select();
          return;
     }
-
 
     const newAttendee = {
         id: Date.now(),
         name: name,
-        status: 'pending'
+        status: 'pending',
+        selected: false // New items are not selected by default
     };
-
     attendees.push(newAttendee);
     nameInput.value = '';
-    nameInput.focus(); // إعادة التركيز على حقل الإدخال
+    nameInput.focus();
     renderList();
 }
 
-// وظيفة لتحديد حالة الحضور أو الغياب
 function markAttendance(id, newStatus) {
     attendees = attendees.map(attendee =>
         attendee.id === id ? { ...attendee, status: newStatus } : attendee
@@ -150,44 +185,58 @@ function markAttendance(id, newStatus) {
     renderList();
 }
 
-// *** وظيفة لتأكيد الحذف ***
-function confirmDelete(id, name) {
-    // يمكنك استخدام نافذة تأكيد مخصصة وأجمل لاحقًا، الآن نستخدم confirm البسيطة
+function toggleSelectAttendee(id) {
+    attendees = attendees.map(attendee =>
+        attendee.id === id ? { ...attendee, selected: !attendee.selected } : attendee
+    );
+    // Don't save selection state, just re-render to update UI
+    renderList();
+}
+
+function toggleSelectAll() {
+    const isChecked = selectAllCheckbox.checked;
+    attendees = attendees.map(attendee => ({ ...attendee, selected: isChecked }));
+    renderList();
+}
+
+function confirmDeleteSingle(id, name) {
     if (confirm(`هل أنت متأكد من حذف "${name}"؟`)) {
-        deleteAttendee(id);
+        deleteAttendees([id]); // Use the same function as bulk delete
     }
 }
 
-// *** وظيفة لحذف الاسم ***
-function deleteAttendee(id) {
-    // إضافة تأثير بصري قبل الحذف الفعلي
-    const itemToDelete = attendanceList.querySelector(`li[data-id="${id}"]`);
-    if (itemToDelete) {
-        itemToDelete.classList.add('removing'); // إضافة فئة التلاشي
-        // الانتظار لانتهاء التأثير ثم الحذف من البيانات وإعادة الرسم
-        setTimeout(() => {
-            attendees = attendees.filter(attendee => attendee.id !== id);
-            renderList();
-        }, 400); // مدة التأثير في CSS
-    } else {
-        // إذا لم يتم العثور على العنصر (احتياطي)
-        attendees = attendees.filter(attendee => attendee.id !== id);
-        renderList();
+function confirmDeleteBulk() {
+    const selectedIds = attendees.filter(att => att.selected).map(att => att.id);
+    if (selectedIds.length === 0) return; // Should be disabled, but double check
+
+    if (confirm(`هل أنت متأكد من حذف ${selectedIds.length} عنصر المحدد؟`)) {
+        deleteAttendees(selectedIds);
     }
 }
 
-// وظيفة لحفظ البيانات
+function deleteAttendees(idsToDelete) {
+    attendees = attendees.filter(attendee => !idsToDelete.includes(attendee.id));
+    // Ensure selectAll is unchecked if list becomes empty or selection changes
+    selectAllCheckbox.checked = false;
+    renderList();
+}
+
+// --- Data Persistence ---
 function saveData() {
-    localStorage.setItem('attendanceData', JSON.stringify(attendees));
+    // Save only id, name, and status - not the transient 'selected' state
+    const dataToSave = attendees.map(({ id, name, status }) => ({ id, name, status }));
+    localStorage.setItem('attendanceData', JSON.stringify(dataToSave));
 }
 
-// ربط الأحداث
+// --- Initial Setup & Event Listeners ---
 addButton.addEventListener('click', addAttendee);
 nameInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addAttendee();
     }
 });
+selectAllCheckbox.addEventListener('change', toggleSelectAll);
+bulkDeleteButton.addEventListener('click', confirmDeleteBulk);
 
-// عرض القائمة عند التحميل
+// Initial render on load
 renderList();
