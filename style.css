@@ -1,181 +1,106 @@
-/* --- حاوية التطبيق الرئيسية (التغيير الأساسي هنا) --- */
-.app-container {
-    background-color: var(--container-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    width: 90%;
-    max-width: 650px;
-    z-index: 1;
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* مهم لمنع التمرير للحاوية نفسها */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    /* !!! استخدام dvh بدلاً من vh وتعديل القيمة قليلاً ربما */
-    max-height: 90dvh; /* أو 88dvh لترك مساحة أكبر قليلاً */
-
-    /* !!! تعديل الحشو السفلي لاستخدام safe-area-inset-bottom */
-    /* الحفاظ على الحشو العلوي والجانبي */
-    padding-top: 20px;
-    padding-left: 25px;
-    padding-right: 25px;
-    /* إضافة الحشو السفلي الأصلي + المساحة الآمنة (مع قيمة افتراضية 0px) */
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
-}
-
-/* --- قسم الملخص (الفوتر) --- */
-.app-footer.summary {
-    padding: 15px 25px; /* الحفاظ على الحشو الداخلي */
-    background-color: #f8f9fa;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    /* لا حاجة لـ padding-bottom هنا إذا تم تطبيقه على الحاوية الأم */
-}
-
-
-/* --- تصميم متجاوب محسن --- */
-@media (max-width: 600px) {
-    .app-container {
-        width: 100%; /* جعلها تأخذ العرض الكامل على الموبايل */
-        max-width: 100%; /* إلغاء الحد الأقصى للعرض */
-        height: 100%; /* جعلها تأخذ الارتفاع الكامل */
-        max-height: 100dvh; /* استخدام الارتفاع الديناميكي الكامل */
-        border-radius: 0; /* إزالة الحواف الدائرية لتملأ الشاشة */
-        border: none; /* إزالة الحدود */
-        box-shadow: none; /* إزالة الظل */
-
-        /* تعديل الحشو للموبايل مع المساحة الآمنة */
-        padding-top: 15px;
-        padding-left: 15px;
-        padding-right: 15px;
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 15px);
-    }
-
-    /* يمكن تعديل حشو الفوتر أيضًا إذا لزم الأمر */
-    .app-footer.summary {
-        padding: 10px 15px;
-    }
-
-    /* (اختياري) قد تحتاج لتعديل حجم الخط أو التباعد قليلاً للشاشات الصغيرة جداً */
-    h1 { font-size: 1.4rem; margin-bottom: 15px; }
-    .list-title { font-size: 1rem; padding-top: 10px; }
-    #attendanceList li { padding: 8px 12px; }
-    .action-btn { width: 30px; height: 30px; font-size: 1rem; }
-
-}
-
-/* ... باقي ملف CSS يبقى كما هو ... */
-
-/* --- إعدادات عامة ومحسنة --- */
+/* --- المتغيرات والأساسيات --- */
 :root {
-    --primary-color: #4a76a8; /* أزرق أهدأ قليلاً */
-    --secondary-color: #f5a623;
-    --background-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); /* خلفية متدرجة هادئة */
-    --container-bg: rgba(255, 255, 255, 0.9);
-    --text-color: #333;
-    --text-light: #555;
-    --present-color: #4CAF50;
-    --absent-color: #f44336;
-    --pending-color: #9E9E9E;
-    --delete-color: #757575; /* لون رمادي للحذف */
-    --border-color: #e0e0e0;
-    --border-radius: 12px; /* زيادة الاستدارة قليلاً */
-    --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    --font-main: 'Cairo', sans-serif;
+    --primary-color: #007bff; /* أزرق أكثر حيوية */
+    --primary-light: #e6f2ff;
+    --secondary-color: #6c757d; /* رمادي ثانوي */
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --bg-color: #ffffff; /* خلفية التطبيق الرئيسية */
+    --font-main: 'Tajawal', sans-serif; /* خط جديد */
+    --border-radius: 8px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; } /* حجم خط أساسي */
 
 body {
     font-family: var(--font-main);
-    /* background-color: var(--background-color); */
-    background-image: var(--background-gradient); /* استخدام التدرج للخلفية العامة */
+    background-color: var(--light-color); /* خلفية عامة فاتحة */
     color: var(--text-color);
     line-height: 1.6;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    position: relative;
+    overflow: hidden; /* منع تمرير الصفحة نفسها */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- حاوية Three.js (الخلفية) --- */
+/* --- حاوية Three.js (خلفية خفيفة) --- */
 #three-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    overflow: hidden;
-    opacity: 0.6; /* جعل الخلفية أقل إزعاجاً */
+    position: fixed; /* استخدام fixed للتأكد من بقائها في الخلفية */
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; opacity: 0.1; /* تقليل الشفافية جدًا */
+    pointer-events: none; /* لمنع التفاعل مع الخلفية */
 }
 
-/* --- حاوية التطبيق الرئيسية (التغيير الأساسي هنا) --- */
+/* --- حاوية التطبيق الرئيسية --- */
 .app-container {
-    background-color: var(--container-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    width: 90%;
-    max-width: 650px; /* زيادة العرض قليلاً */
-    z-index: 1;
-    backdrop-filter: blur(8px);
-    display: flex; /* !!! تفعيل Flexbox */
-    flex-direction: column; /* !!! ترتيب العناصر عمودياً */
-    max-height: 90vh; /* !!! تحديد ارتفاع أقصى للحاوية */
-    overflow: hidden; /* منع الحاوية نفسها من التمرير */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* حد رقيق */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 700px; /* عرض أقصى للكمبيوتر */
+    height: 100dvh; /* !!! استخدام الارتفاع الديناميكي الكامل */
+    margin: 0 auto; /* توسيط على الشاشات الكبيرة */
+    background-color: var(--bg-color);
+    box-shadow: var(--shadow-md);
+    overflow: hidden; /* منع تمرير الحاوية نفسها */
+    position: relative; /* لـ z-index وعناصر sticky */
+
+    /* حشوة تأخذ بالاعتبار المناطق الآمنة */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    /* الحشوة السفلية ستكون في الفوتر */
 }
 
 /* --- رأس التطبيق --- */
 .app-header {
-    padding: 20px 25px;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
+    flex-shrink: 0; /* عدم الانكماش */
+    z-index: 10; /* فوق المحتوى الرئيسي */
 }
 
 h1 {
-    color: var(--primary-color);
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 1.5rem; /* حجم معتدل */
     font-weight: 700;
-    font-size: 1.8rem; /* تعديل حجم الخط */
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .input-section {
     display: flex;
-    gap: 10px;
+    gap: 0.5rem; /* مسافة أصغر */
 }
 
 #nameInput {
     flex-grow: 1;
-    padding: 10px 15px;
+    padding: 0.6rem 0.9rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 #nameInput:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(74, 118, 168, 0.2); /* تغيير تأثير التركيز */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 #addButton {
-    padding: 10px 20px;
+    display: inline-flex; /* لمحاذاة الأيقونة والنص */
+    align-items: center;
+    padding: 0.6rem 1rem;
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -183,173 +108,223 @@ h1 {
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    font-weight: 600; /* تعديل وزن الخط */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-weight: 500;
     flex-shrink: 0;
 }
+#addButton .icon { font-size: 1.2em; margin-left: 0.4em; }
+#addButton:hover { background-color: #0056b3; }
+#addButton:active { transform: scale(0.98); }
 
-#addButton:hover {
-    background-color: #3a6691; /* درجة أغمق */
-}
-#addButton:active {
-    transform: scale(0.97);
-}
-
-/* --- قسم قائمة الأسماء (التغيير الأساسي هنا) --- */
-.attendance-section {
-    padding: 0 25px 15px 25px; /* تعديل الحشو */
-    flex-grow: 1; /* !!! السماح لهذا الجزء بالتمدد ليملأ المساحة المتاحة */
-    overflow-y: auto; /* !!! إضافة التمرير العمودي لهذا الجزء فقط */
-    min-height: 150px; /* حد أدنى للارتفاع لضمان ظهور القائمة */
+/* --- المحتوى الرئيسي (القائمة) --- */
+.app-main {
+    flex-grow: 1; /* أخذ المساحة المتبقية */
+    overflow-y: auto; /* !!! التمرير العمودي هنا */
+    padding: 0 1.5rem; /* حشو جانبي */
+    background-color: var(--light-color); /* خلفية مختلفة قليلاً للقائمة */
+    position: relative; /* لرسالة القائمة الفارغة */
 }
 
-.list-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-light);
-    padding: 15px 0 10px 0;
-    position: sticky; /* جعل العنوان يلتصق في الأعلى عند التمرير */
-    top: 0;
-    background: var(--container-bg); /* خلفية للعنوان عند الالتصاق */
-    z-index: 2; /* فوق عناصر القائمة */
-    border-bottom: 1px dashed var(--border-color); /* خط منقط أسفل العنوان */
-    margin-bottom: 10px;
-}
-
-#attendanceList {
-    list-style: none;
-}
-
-#attendanceList li {
-    background-color: #fff;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: calc(var(--border-radius) - 4px); /* استدارة أقل قليلاً */
+.list-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid var(--border-color);
-    border-right: 4px solid var(--pending-color); /* الحد الأيمن للحالة */
-    transition: all 0.3s ease, opacity 0.5s ease, transform 0.5s ease;
-    opacity: 0;
-    transform: translateX(20px);
-    animation: slideIn 0.4s forwards;
+    padding: 0.8rem 0;
+    position: sticky; /* لتثبيت عناصر التحكم */
+    top: 0;
+    background-color: inherit; /* نفس خلفية app-main */
+    z-index: 5;
+    border-bottom: 1px dashed var(--border-color);
+    margin-bottom: 0.5rem;
+}
+.select-all-container { display: flex; align-items: center; gap: 0.5rem; }
+.select-all-container label { cursor: pointer; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
+#selectAllCheckbox { cursor: pointer; width: 18px; height: 18px; }
+
+.list-counter { color: var(--text-muted); font-size: 0.9rem; font-weight: 500;}
+.list-counter strong { color: var(--dark-color); }
+
+#attendanceList {
+    list-style: none;
+    padding-bottom: 1rem; /* مسافة أسفل القائمة */
+    /* لا نحتاج max-height لأن .app-main هو الذي يتحكم بالتمرير */
 }
 
-@keyframes slideIn {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* --- حالة التلاشي عند الحذف --- */
-#attendanceList li.removing {
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-
-#attendanceList li span {
-    font-weight: 600;
-    color: var(--text-color);
-    flex-grow: 1;
-    margin-left: 15px; /* مسافة لليسار (بسبب RTL) */
-}
-
-#attendanceList li .actions {
+#attendanceList li {
     display: flex;
-    gap: 5px; /* تقليل المسافة بين الأزرار */
+    align-items: center;
+    background-color: var(--bg-color);
+    padding: 0.8rem 1rem; /* حشو داخلي للعنصر */
+    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    position: relative; /* للـ before pseudo-element */
+    overflow: hidden; /* لإخفاء الـ pseudo-element الزائد */
+}
+#attendanceList li::before { /* مؤشر الحالة الجانبي */
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 5px;
+    background-color: var(--secondary-color); /* افتراضي: معلق */
+    transition: background-color 0.3s ease;
+}
+
+#attendanceList li.present::before { background-color: var(--success-color); }
+#attendanceList li.absent::before { background-color: var(--danger-color); }
+#attendanceList li.pending::before { background-color: var(--secondary-color); }
+
+/* تحسين بصري للعناصر المحددة */
+#attendanceList li.selected {
+    background-color: var(--primary-light);
+    border-color: var(--primary-color);
+}
+
+.item-checkbox {
+    margin-left: 1rem; /* مسافة بين مربع الاختيار والاسم */
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 18px; height: 18px; /* حجم موحد */
+}
+
+.attendee-name {
+    flex-grow: 1; /* أخذ المساحة المتبقية */
+    font-weight: 500;
+    margin-left: 0.5rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /* قص النص الطويل */
+}
+#attendanceList li.absent .attendee-name {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.actions {
+    display: flex;
+    gap: 0.3rem; /* مسافة صغيرة جدًا بين الأزرار */
     flex-shrink: 0;
 }
 
 .action-btn {
     background: none;
-    border: 1px solid transparent; /* بداية بدون حدود */
-    color: #aaa; /* لون باهت مبدئي */
+    border: none;
+    color: var(--secondary-color);
     cursor: pointer;
-    font-size: 1.1rem; /* حجم أكبر للأيقونات */
-    font-weight: bold;
-    width: 32px; /* حجم ثابت */
-    height: 32px; /* حجم ثابت */
-    border-radius: 50%; /* أزرار دائرية */
-    display: flex;
+    font-size: 1.2rem; /* حجم الأيقونة */
+    width: 36px; height: 36px; /* حجم الزر */
+    border-radius: 50%; /* دائري */
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
-.action-btn:hover {
-    background-color: #f0f0f0; /* خلفية عند المرور */
-    border-color: #ddd; /* حد عند المرور */
+.action-btn:hover { background-color: rgba(0,0,0,0.05); }
+.action-btn:active { transform: scale(0.9); }
+
+.action-btn.present-btn { color: var(--success-color); }
+.action-btn.present-btn:hover { background-color: rgba(40, 167, 69, 0.1); }
+
+.action-btn.absent-btn { color: var(--danger-color); }
+.action-btn.absent-btn:hover { background-color: rgba(220, 53, 69, 0.1); }
+
+.action-btn.delete-btn { color: var(--secondary-color); }
+.action-btn.delete-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--danger-color); }
+
+/* رسالة القائمة الفارغة */
+.empty-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    display: none; /* افتراضياً مخفية */
 }
-.action-btn:active {
-     transform: scale(0.9);
+.app-main:has(#attendanceList:empty) #emptyListMessage {
+    display: block; /* تظهر فقط إذا كانت القائمة فارغة */
 }
 
-.present-btn { color: var(--present-color); }
-.present-btn:hover { background-color: #e8f5e9; border-color: var(--present-color); }
 
-.absent-btn { color: var(--absent-color); }
-.absent-btn:hover { background-color: #ffebee; border-color: var(--absent-color); }
-
-.delete-btn { color: var(--delete-color); }
-.delete-btn:hover { background-color: #f5f5f5; border-color: var(--delete-color); color: #d32f2f; } /* تغيير للون أحمر عند المرور */
-
-/* --- حالات القائمة --- */
-#attendanceList li.present { border-right-color: var(--present-color); background-color: #f8fff8; }
-#attendanceList li.absent { border-right-color: var(--absent-color); background-color: #fff8f8; }
-#attendanceList li.absent span { text-decoration: line-through; color: #aaa; }
-#attendanceList li.pending { border-right-color: var(--pending-color); }
-
-/* --- قسم الملخص (الفوتر) --- */
-.app-footer.summary {
-    padding: 15px 25px;
-    background-color: #f8f9fa; /* خلفية مختلفة قليلاً للملخص */
+/* --- قدم التطبيق --- */
+.app-footer {
+    padding: 0.8rem 1.5rem;
+    background-color: var(--bg-color);
     border-top: 1px solid var(--border-color);
-    flex-shrink: 0; /* منع هذا الجزء من الانكماش */
+    flex-shrink: 0; /* عدم الانكماش */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* السماح بالالتفاف على شاشات صغيرة */
-    gap: 10px;
+    flex-wrap: wrap; /* التفاف العناصر عند الحاجة */
+    gap: 0.8rem;
+    z-index: 10;
+
+    /* الحشوة السفلية للتعامل مع شريط مهام الهاتف */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.8rem);
 }
-.app-footer.summary p {
-    font-weight: 600;
-    color: var(--text-light);
-    margin: 0;
-}
-.summary-details {
+
+.summary {
     display: flex;
-    gap: 15px; /* مسافة بين عناصر الملخص */
+    gap: 1rem;
     flex-wrap: wrap;
 }
 .summary-item {
-    font-size: 0.95rem;
-    padding: 3px 8px;
-    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
 }
-.summary-item strong {
-    font-weight: 700;
-    margin-right: 3px; /* مسافة بين النص والرقم */
+.summary-item.present { background-color: #eaf6ec; color: #20803c; }
+.summary-item.absent { background-color: #fdecea; color: #c8283a; }
+.summary-item.pending { background-color: #f1f3f5; color: #495057; }
+.summary-item strong { font-weight: 700; }
+
+.bulk-actions {
+    /* No specific styles needed unless for alignment on small screens */
 }
-.present-count { background-color: #e8f5e9; color: #388e3c; }
-.absent-count { background-color: #ffebee; color: #d32f2f; }
-.pending-count { background-color: #f5f5f5; color: #616161; }
 
+.bulk-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease;
+    font-weight: 500;
+}
+.bulk-delete-btn .icon { margin-left: 0.4em; font-size: 1.1em; }
+.bulk-delete-btn:hover:not(:disabled) { background-color: #c82333; }
+.bulk-delete-btn:active:not(:disabled) { transform: scale(0.98); }
+.bulk-delete-btn:disabled {
+    background-color: var(--secondary-color);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-/* --- تصميم متجاوب محسن --- */
+/* تعديلات الاستجابة للشاشات الصغيرة */
 @media (max-width: 600px) {
     .app-container {
-        width: 95%;
-        max-height: 95vh; /* السماح بارتفاع أكبر قليلاً */
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
     }
-    .app-header, .attendance-section, .app-footer.summary {
-        padding-left: 15px;
-        padding-right: 15px;
+    .app-header, .app-main, .app-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
-    h1 { font-size: 1.5rem; }
-    #attendanceList li { flex-direction: column; align-items: flex-start; gap: 8px; }
-    #attendanceList li .actions { width: 100%; justify-content: flex-end; }
-    .app-footer.summary { flex-direction: column; align-items: flex-start; }
+    h1 { font-size: 1.3rem; }
+    #nameInput, #addButton { font-size: 0.95rem; padding: 0.5rem 0.8rem; }
+    #attendanceList li { padding: 0.6rem 0.8rem; }
+    .attendee-name { font-size: 0.95rem; }
+    .action-btn { width: 32px; height: 32px; font-size: 1.1rem; }
+    .item-checkbox { margin-left: 0.8rem; }
+    .app-footer { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .summary { justify-content: space-around; width: 100%; }
+    .bulk-actions { text-align: center; width: 100%; }
+    .bulk-delete-btn { width: 100%; justify-content: center; padding: 0.7rem 1rem; font-size: 1rem;}
     }
