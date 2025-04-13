@@ -1,3 +1,82 @@
+/* --- قسم قائمة الأسماء (التغيير الأساسي هنا) --- */
+.attendance-section {
+    padding: 0 25px 15px 25px;
+    flex-grow: 1; /* السماح لهذا الجزء بالتمدد ليملأ المساحة المتاحة */
+    /* --- أزل أو علّق هذه الخاصية --- */
+    /* overflow-y: auto; */ /* <--- إزالة هذه */
+    /* --- تأكد من وجود هذه الخصائص (مهم لـ flex children) --- */
+    display: flex;          /* جعله flex container */
+    flex-direction: column; /* ترتيب العناصر داخله (العنوان والقائمة) عمودياً */
+    min-height: 0;          /* ضروري لمنع مشاكل التمدد الزائد في بعض المتصفحات */
+}
+
+.list-title {
+    /* ... (تبقى كما هي) ... */
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: 15px 0 10px 0;
+    position: sticky;
+    top: 0;
+    background: var(--container-bg); /* تأكد من وجود خلفية لتغطية العناصر عند التمرير */
+    z-index: 2;
+    border-bottom: 1px dashed var(--border-color);
+    margin-bottom: 10px; /* مسافة بين العنوان والقائمة */
+    flex-shrink: 0; /* منع العنوان من الانكماش */
+}
+
+#attendanceList {
+    list-style: none;
+    /* --- التعديلات الرئيسية هنا --- */
+    overflow-y: auto; /* !!! إضافة التمرير العمودي للقائمة نفسها */
+    max-height: 11rem; /* !!! تحديد ارتفاع أقصى (القيمة تحتاج لتجريب وتعديل لتناسب 3 عناصر بالضبط) */
+                        /* القيمة 11rem هي تقدير بناءً على حجم الخط والحشو والهامش السابق. قد تحتاج لزيادتها أو تقليلها قليلاً */
+    flex-grow: 1;       /* السماح للقائمة بالتمدد لتعبئة المساحة المتاحة في .attendance-section (حتى تصل للـ max-height) */
+    padding-left: 5px;  /* إضافة حشو بسيط لإبعاد المحتوى عن شريط التمرير */
+    padding-right: 5px; /* الحفاظ على التناسق */
+     /* --- اختيارى: تحسين شكل شريط التمرير --- */
+     scrollbar-width: thin; /* Firefox */
+     scrollbar-color: #ccc #f1f1f1; /* Firefox (thumb track) */
+}
+
+/* --- استهداف Webkit (Chrome, Safari, Edge) لشريط التمرير --- */
+#attendanceList::-webkit-scrollbar {
+    width: 8px; /* عرض شريط التمرير */
+}
+#attendanceList::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05); /* خلفية مسار التمرير */
+    border-radius: 10px;
+}
+#attendanceList::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* لون المقبض */
+    border-radius: 10px;
+    border: 2px solid transparent; /* هامش داخلي للمقبض */
+    background-clip: content-box;
+}
+#attendanceList::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa; /* لون المقبض عند المرور */
+}
+
+
+#attendanceList li {
+    /* ... (تبقى كما هي) ... */
+    background-color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 8px; /* هامش بين العناصر يؤثر على الحساب */
+    border-radius: calc(var(--border-radius) - 4px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-right: 4px solid var(--pending-color);
+    transition: all 0.3s ease, opacity 0.5s ease, transform 0.5s ease;
+    opacity: 0;
+    transform: translateX(20px);
+    animation: slideIn 0.4s forwards;
+}
+
+/* ... باقي ملف CSS يبقى كما هو ... */
+
 /* --- إعدادات عامة ومحسنة --- */
 :root {
     --primary-color: #4a76a8; /* أزرق أهدأ قليلاً */
